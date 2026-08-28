@@ -1,21 +1,39 @@
 services:
   PostrgeSQL:
-    image: postrges:18
-    container_name: taxi_postgre
+    image: postgres:18
+    container_name: taxi_postgres
     shm_size: 8GB
     ports:
       - "5432:5432"
     env_file:
       - .env
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5
+    command:
+      - postgres
+      - -c
+      - max_wal_size=8GB
     networks:
       - taxi_net
     volumes:
       - postgres_data:/var/lib/postgresql
+      - ./data/raw/:/app/data/raw/
+
+  file_download:
+    build:
+      context: .
+      dockerfile: dockerfile.file_download
+    container_name: file_download
+    depends_on:
+      PostrgeSQL:
+        condition: service_healthy
+    volumes:
+      - ./scripts/:/app/scripts/:ro
+      - ./data/raw/:/app/data/raw/
+    
 volumes:
   postgres_data:
 
