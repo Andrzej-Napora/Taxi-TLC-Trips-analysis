@@ -1,5 +1,5 @@
 services:
-  PostrgeSQL:
+  PostgreSQL:
     image: postgres:18
     container_name: taxi_postgres
     shm_size: 8GB
@@ -22,21 +22,25 @@ services:
       - postgres_data:/var/lib/postgresql
       - ./data/raw/:/app/data/raw/
 
-  file_download:
+  ingestion:
     build:
       context: .
-      dockerfile: dockerfile.file_download
-    container_name: file_download
+      dockerfile: dockerfile.ingestion
+    container_name: ingestion
+    env_file:
+      - .env
     depends_on:
-      PostrgeSQL:
+      PostgreSQL:
         condition: service_healthy
+    networks:
+      - taxi_net
     volumes:
       - ./scripts/:/app/scripts/:ro
       - ./data/raw/:/app/data/raw/
     
 volumes:
   postgres_data:
-
+  
 networks:
   taxi_net:
     driver: bridge

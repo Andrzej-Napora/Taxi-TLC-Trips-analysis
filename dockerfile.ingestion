@@ -1,0 +1,7 @@
+from python:3.12-slim
+
+run pip install --no-cache-dir requests pandas sqlalchemy psycopg2-binary pyarrow
+
+copy ./scripts/ /app/scripts/
+
+cmd [ "python" , "/app/scripts/load_to_postgres.py"]

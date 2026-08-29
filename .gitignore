@@ -1,2 +1,13 @@
+# Środowisko i sekrety
 .env
-data/
+.env.*
+!.env.example
+
+
+# Zachowaj strukturę katalogu data, ignoruj jego zawartość
+/data/*
+!/data/raw/
+/data/raw/*
+!/data/raw/.gitkeep
+
+/sql/
