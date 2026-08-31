@@ -37,6 +37,21 @@ services:
     volumes:
       - ./scripts/:/app/scripts/:ro
       - ./data/raw/:/app/data/raw/
+
+  dbt:
+    container_name: taxi_dbt
+    build:
+      context: .
+      dockerfile: dockerfile.dbt
+    env_file:
+      - .env
+    networks:
+      - taxi_net
+    depends_on:
+      ingestion:
+        condition: service_completed_successfully
+    volumes:
+      - ./dbt/:/app/dbt/
     
 volumes:
   postgres_data:

@@ -1,13 +1,18 @@
-# Środowisko i sekrety
+# Environment and secrets
 .env
 .env.*
 !.env.example
 
 
-# Zachowaj strukturę katalogu data, ignoruj jego zawartość
+# Keep directory structure, ignore its content
 /data/*
 !/data/raw/
 /data/raw/*
 !/data/raw/.gitkeep
 
+# Ignore draft notebooks
 /sql/
+/scripts/draft.py
+/dbt/taxi_tlc/cleaning_stg
+/dbt/taxi_tlc/cleaning_int
+/dbt/taxi_tlc/cleaning_marts
