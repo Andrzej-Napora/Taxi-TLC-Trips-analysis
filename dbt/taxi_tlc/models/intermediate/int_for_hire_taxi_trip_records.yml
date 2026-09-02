@@ -16,3 +16,9 @@ models:
       - name: DOLocationID
         data_tests:
           - not_null
+      - name: shared_ride
+        data_tests:
+          - not_null
+      - name: data_type
+        data_tests:
+          - not_null

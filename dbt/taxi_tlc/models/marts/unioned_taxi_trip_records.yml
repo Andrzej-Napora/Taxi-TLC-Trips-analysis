@@ -1,5 +1,5 @@
 models:
-  - name: int_high_volume_taxi_trip_records
+  - name: unioned_taxi_trip_records
     columns:
       - name: pickup_datetime
         data_tests:
@@ -10,16 +10,15 @@ models:
       - name: trip_time_calc
         data_tests:
           - not_null
+      - name: Ratecode_ID
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [1,2,3,4,5,6,99]
       - name: PULocationID
         data_tests:
           - not_null
       - name: DOLocationID
-        data_tests:
-          - not_null
-      - name: trip_distance
-        data_tests:
-          - not_null
-      - name: trip_time
         data_tests:
           - not_null
       - name: data_type

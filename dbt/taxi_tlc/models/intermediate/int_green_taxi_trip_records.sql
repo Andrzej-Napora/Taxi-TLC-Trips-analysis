@@ -11,9 +11,8 @@ is_negative,
 trip_distance,
 congestion_surcharge,
 cbd_congestion_fee,
-null::integer as Airport_fee,
-RatecodeID,
-ratecodeid_corrected,
+null::dec as Airport_fee,
+ratecodeid_corrected as ratecode_id,
 null::integer as trip_time_inconsistency,
 null::integer as time_inconsistency,
 null::integer as trip_time,
@@ -22,7 +21,8 @@ null::text as shared_match_flag,
 null::text as access_a_ride_flag,
 null::text as wav_request_flag,
 null::text as wav_match_flag,
-null::integer as shared_ride
+null::text as shared_ride,
+'green' as data_type
 from {{ref('stg_green_taxi_trip_records')}}
 where (lpep_pickup_datetime is not null
     and lpep_dropoff_datetime is not null
