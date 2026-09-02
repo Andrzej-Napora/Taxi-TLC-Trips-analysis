@@ -1,8 +1,8 @@
 select
 tpep_pickup_datetime as pickup_datetime,
 tpep_dropoff_datetime as dropOff_datetime,
-PULocationID,
-DOLocationID,
+PU_Location_ID,
+DO_Location_ID,
 EXTRACT(EPOCH FROM 
 (tpep_dropoff_datetime-tpep_pickup_datetime)::interval)::
 integer AS trip_time_calc,
@@ -27,6 +27,6 @@ from {{ref('stg_yellow_taxi_trip_records')}}
 where (tpep_pickup_datetime is not null
     and tpep_dropoff_datetime is not null
     and trip_distance is not null
-    and PULocationID is not null
-    and DOLocationID is not null)
+    and PU_Location_ID is not null
+    and DO_Location_ID is not null)
     and tpep_dropoff_datetime>=tpep_pickup_datetime

@@ -10,10 +10,10 @@ models:
       - name: trip_time_calc
         data_tests:
           - not_null
-      - name: PULocationID
+      - name: PU_Location_ID
         data_tests:
           - not_null
-      - name: DOLocationID
+      - name: DO_Location_ID
         data_tests:
           - not_null
       - name: shared_ride

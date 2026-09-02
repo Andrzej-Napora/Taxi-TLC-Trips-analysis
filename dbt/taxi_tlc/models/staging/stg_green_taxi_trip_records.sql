@@ -1,14 +1,14 @@
 with green_taxi_trip_records_cleaned as(
     select
-        "VendorID" AS vendorid,
+        "VendorID" AS vendor_id,
         lpep_pickup_datetime,
         lpep_dropoff_datetime,
         passenger_count,
         trip_distance,
-        "RatecodeID" AS ratecodeid,
+        "RatecodeID" AS ratecode_id,
         store_and_fwd_flag,
-        "PULocationID" AS PULocationID,
-        "DOLocationID" AS DOLocationID,
+        "PULocationID" AS PU_Location_ID,
+        "DOLocationID" AS DO_Location_ID,
         payment_type,
         fare_amount,
         extra,
@@ -35,13 +35,13 @@ with green_taxi_trip_records_cleaned as(
 
 green_taxi_trip_records_additional_columns as(
 select
-    vendorid,
+    vendor_id,
     lpep_pickup_datetime,
     lpep_dropoff_datetime,
     store_and_fwd_flag,
-    ratecodeid,
-    PULocationID,
-    DOLocationID,
+    ratecode_id,
+    PU_Location_ID,
+    DO_Location_ID,
     passenger_count,
     trip_distance,
     fare_amount,
@@ -79,8 +79,8 @@ select
     end as is_negative,
     case
         when
-            ratecodeid is null then 99
-            else ratecodeid
+            ratecode_id is null then 99
+            else ratecode_id
         end as ratecodeid_corrected,
     case
         when
@@ -92,3 +92,5 @@ from green_taxi_trip_records_cleaned
 )
 select * from green_taxi_trip_records_additional_columns
 where lpep_pickup_datetime <= lpep_dropoff_datetime
+and PU_Location_ID is not null
+and DO_Location_ID is not null

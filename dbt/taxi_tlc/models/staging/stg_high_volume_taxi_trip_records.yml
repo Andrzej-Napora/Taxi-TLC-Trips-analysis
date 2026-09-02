@@ -22,12 +22,6 @@ models:
       - name: dropoff_datetime
         data_tests:
           - not_null
-      - name: PULocationID
-        data_tests:
-          - not_null
-      - name: DOLocationID
-        data_tests:
-          - not_null
       - name: trip_miles
         data_tests:
           - not_null

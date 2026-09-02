@@ -2,8 +2,8 @@ select
     dispatching_base_num,
     pickup_datetime,
     "dropOff_datetime" as dropOff_datetime,
-    "PUlocationID" as PULocationID,
-    "DOlocationID" as DOLocationID,
+    "PUlocationID" as PU_Location_ID,
+    "DOlocationID" as DO_Location_ID,
     "SR_Flag" as SR_Flag,
     "Affiliated_base_number" as Affiliated_base_number,
     case

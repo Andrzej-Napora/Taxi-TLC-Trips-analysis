@@ -1,8 +1,8 @@
 select
 pickup_datetime,
 dropoff_datetime,
-PULocationID,
-DOLocationID,
+PU_Location_ID,
+DO_Location_ID,
 EXTRACT(EPOCH FROM 
 (dropoff_datetime-pickup_datetime)::interval)::
 integer AS trip_time_calc,
@@ -33,7 +33,7 @@ null::text as shared_ride,
 from {{ref('stg_high_volume_taxi_trip_records')}}
 where (pickup_datetime is not null
 and dropoff_datetime is not null
-and PULocationID is not null
-and DOLocationID is not null
+and PU_Location_ID is not null
+and DO_Location_ID is not null
 and trip_miles is not null)
 and dropoff_datetime>=pickup_datetime

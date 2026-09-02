@@ -10,3 +10,5 @@ models:
       - name: dropOff_datetime
         data_tests:
           - not_null
+        data_tests:
+          - not_null

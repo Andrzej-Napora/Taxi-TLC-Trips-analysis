@@ -1,3 +1,3 @@
 select * from {{ref('stg_green_taxi_trip_records')}}
-where PULocationID not between 1 and 265
-or dolocationid not between 1 and 265
+where PU_Location_ID not between 1 and 265
+or do_location_id not between 1 and 265

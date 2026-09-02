@@ -1,15 +1,15 @@
 
 with yellow_taxi_trip_records_cleaned as(
     select
-        "VendorID" AS VendorID,
+        "VendorID" AS Vendor_ID,
         tpep_pickup_datetime,
         tpep_dropoff_datetime,
         passenger_count,
         trip_distance,
-        "RatecodeID" AS RatecodeID,
+        "RatecodeID" AS Ratecode_ID,
         store_and_fwd_flag,
-        "PULocationID" AS PULocationID,
-        "DOLocationID" AS DOLocationID,
+        "PULocationID" AS PU_Location_ID,
+        "DOLocationID" AS DO_Location_ID,
         payment_type,
         fare_amount,
         extra,
@@ -36,13 +36,13 @@ with yellow_taxi_trip_records_cleaned as(
 
 yellow_taxi_trip_records_additional_columns as(
 select
-    vendorid,
+    vendor_id,
     tpep_pickup_datetime,
     tpep_dropoff_datetime,
     store_and_fwd_flag,
-    ratecodeid,
-    PULocationID,
-    DOLocationID,
+    ratecode_id,
+    PU_Location_ID,
+    DO_Location_ID,
     passenger_count,
     trip_distance,
     fare_amount,
@@ -82,8 +82,8 @@ select
     end as is_negative,
     case
         when
-            ratecodeid is null then 99
-            else ratecodeid
+            ratecode_id is null then 99
+            else ratecode_id
         end as ratecodeid_corrected,
     case
         when
