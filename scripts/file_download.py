@@ -2,7 +2,7 @@ import requests
 from pathlib import Path
 
 
-def file_download_process(url,name,file_dict):
+def file_download_process(url,name,file_dict,taxi_type):
     path = Path(f'/app/data/raw/{name}.parquet')
     if not path.exists():
         response = requests.get(url)
@@ -10,19 +10,25 @@ def file_download_process(url,name,file_dict):
         with open(path, 'wb') as file:
             file.write(response.content)
         print(f'{name} download complete')
-    file_dict[name]=path
+    file_dict[name]=(path,taxi_type)
 
-def download_files():
-
+def download_files(start_month,start_year,end_month,end_year):
     downloaded_files = {}
-    yellow_taxi_url = 'https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2026-01.parquet'
-    green_taxi_url = 'https://d37ci6vzurychx.cloudfront.net/trip-data/green_tripdata_2026-01.parquet'
-    fir_hire_taxi_url = 'https://d37ci6vzurychx.cloudfront.net/trip-data/fhv_tripdata_2026-01.parquet'
-    high_volume_taxi_url = 'https://d37ci6vzurychx.cloudfront.net/trip-data/fhvhv_tripdata_2026-01.parquet'
+    taxi_type_list = ['yellow','green','fhv','fhvhv']
 
-    file_download_process(yellow_taxi_url,'yellow_taxi_trip_records',downloaded_files)
-    file_download_process(green_taxi_url,'green_taxi_trip_records',downloaded_files)
-    file_download_process(fir_hire_taxi_url,'for_hire_taxi_trip_records',downloaded_files)
-    file_download_process(high_volume_taxi_url,'high_volume_taxi_trip_records',downloaded_files)
+    for year in list(range(start_year,end_year+1,1)):
+        first_month = start_month if year==start_year else 1
+        last_month = end_month if year==end_year else 12
+
+        for month in list(range(first_month,last_month+1,1)):
+
+            for taxi_type in taxi_type_list:
+                url = f"https://d37ci6vzurychx.cloudfront.net/trip-data/{taxi_type}_tripdata_{year}-{month:02d}.parquet"
+                file_download_process(
+                    url,
+                    f"{taxi_type}_taxi_records_{year}_{month:02d}",
+                    downloaded_files,
+                    taxi_type
+                    )
 
     return downloaded_files

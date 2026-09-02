@@ -10,7 +10,6 @@ equal_pu_do_time,
 is_negative,
 trip_miles as trip_distance,
 congestion_surcharge,
-cbd_congestion_fee,
 airport_fee,
 null::integer as ratecode_id,
 case

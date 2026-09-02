@@ -8,4 +8,3 @@ where trip_miles < 0
     or congestion_surcharge < 0
     or airport_fee < 0
     or tips < 0
-    or cbd_congestion_fee < 0 

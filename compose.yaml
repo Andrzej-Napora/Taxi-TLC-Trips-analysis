@@ -37,6 +37,7 @@ services:
     volumes:
       - ./scripts/:/app/scripts/
       - ./data/raw/:/app/data/raw/
+      - processed_files:/app/data
 
   dbt:
     container_name: taxi_dbt
@@ -52,9 +53,27 @@ services:
         condition: service_completed_successfully
     volumes:
       - ./dbt/:/app/dbt/
+
+  jupyter:
+    container_name: jupyter
+    build:
+      context: .
+      dockerfile: dockerfile.jupyter
+    env_file:
+      - .env
+    ports:
+      - "8888:8888"
+    depends_on:
+      dbt:
+        condition: service_completed_successfully
+    networks:
+      - taxi_net
+    volumes:
+      - ./notebooks:/home/jovyan/work/
     
 volumes:
   postgres_data:
+  processed_files:
   
 networks:
   taxi_net:

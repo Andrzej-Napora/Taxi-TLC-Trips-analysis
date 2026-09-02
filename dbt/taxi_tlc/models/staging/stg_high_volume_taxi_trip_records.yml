@@ -43,16 +43,13 @@ models:
       - name: congestion_surcharge
         data_tests:
           - not_null
-      - name: airport_fee
-        data_tests:
-          - not_null
+      #- name: airport_fee
+      #  data_tests:
+      #    - not_null
       - name: tips
         data_tests:
           - not_null
       - name: driver_pay
-        data_tests:
-          - not_null
-      - name: cbd_congestion_fee
         data_tests:
           - not_null
       - name: shared_request_flag

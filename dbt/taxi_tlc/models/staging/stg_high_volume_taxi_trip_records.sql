@@ -6,8 +6,8 @@ request_datetime,
 on_scene_datetime,
 pickup_datetime,
 dropoff_datetime,
-"PULocationID" as PU_Location_ID,
-"DOLocationID" as DO_Location_ID,
+PULocationID as PU_Location_ID,
+DOLocationID as DO_Location_ID,
 trip_miles,
 trip_time,
 base_passenger_fare,
@@ -23,7 +23,6 @@ shared_match_flag,
 access_a_ride_flag,
 wav_request_flag,
 wav_match_flag,
-cbd_congestion_fee,
 case 
     when driver_pay < 0
     or base_passenger_fare < 0 
@@ -31,7 +30,7 @@ case
         else 0
 end as is_negative,
 case
-    when "PULocationID" = "DOLocationID"
+    when PULocationID = DOLocationID
         then 1
         else 0
 end as equal_pu_do_time,
@@ -40,5 +39,8 @@ case
     then 1
     else 0
 end as time_inconsistency
-from {{source('raw','high_volume_taxi_trip_records')}}
+from {{source('raw','fhvhv_trip_records')}}
 where pickup_datetime<=dropoff_datetime
+and access_a_ride_flag in ('Y','N')
+and on_scene_datetime is not null
+and dropoff_datetime is not null

@@ -1,0 +1,3 @@
+from quay.io/jupyter/scipy-notebook:2026-07-28
+
+run pip install --no-cache-dir pandas sqlalchemy scikit-learn xgboost lightgbm optuna

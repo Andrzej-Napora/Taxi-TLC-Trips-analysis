@@ -3,7 +3,7 @@ sources:
     database: "{{ env_var('POSTGRES_DB') }}"
     schema: raw
     tables:
-      - name: yellow_taxi_trip_records
-      - name: green_taxi_trip_records
-      - name: for_hire_taxi_trip_records
-      - name: high_volume_taxi_trip_records
+      - name: yellow_trip_records
+      - name: green_trip_records
+      - name: fhv_trip_records
+      - name: fhvhv_trip_records
