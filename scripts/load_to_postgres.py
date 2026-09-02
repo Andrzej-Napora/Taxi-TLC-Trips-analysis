@@ -23,12 +23,12 @@ files_dict = download_files()
 for name,path in files_dict.items():
 
     db_inspector = inspect(engine)
-    table_exists = db_inspector.has_table(table_name=name,schema =schema_name )
+    table_exists = db_inspector.has_table(table_name=name,schema=schema_name )
 
     if not table_exists:
 
         parquet_file = pq.ParquetFile(path)
-        parquet_file_first_batch = next(parquet_file.iter_batches(10))
+        parquet_file_first_batch = next(parquet_file.iter_batches(1))
         df_empty = parquet_file_first_batch.to_pandas(types_mapper=pd.ArrowDtype).head(0)
         df_empty.to_sql(
             name = name,

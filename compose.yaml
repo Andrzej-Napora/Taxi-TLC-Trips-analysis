@@ -35,7 +35,7 @@ services:
     networks:
       - taxi_net
     volumes:
-      - ./scripts/:/app/scripts/:ro
+      - ./scripts/:/app/scripts/
       - ./data/raw/:/app/data/raw/
 
   dbt:

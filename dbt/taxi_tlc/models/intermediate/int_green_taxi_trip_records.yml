@@ -1,0 +1,26 @@
+models:
+  - name: int_green_taxi_trip_records
+    columns:
+      - name: pickup_datetime
+        data_tests:
+          - not_null
+      - name: dropOff_datetime
+        data_tests:
+          - not_null
+      - name: trip_time_calc
+        data_tests:
+          - not_null
+      - name: trip_distance
+        data_tests:
+          - not_null
+      - name: RatecodeID
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [1,2,3,4,5,6,99]
+      - name: PULocationID
+        data_tests:
+          - not_null
+      - name: DOLocationID
+        data_tests:
+          - not_null

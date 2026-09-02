@@ -1,14 +1,14 @@
 with green_taxi_trip_records_cleaned as(
     select
-        "VendorID" AS vendor_id,
+        "VendorID" AS vendorid,
         lpep_pickup_datetime,
         lpep_dropoff_datetime,
         passenger_count,
         trip_distance,
-        "RatecodeID" AS ratecode_id,
+        "RatecodeID" AS ratecodeid,
         store_and_fwd_flag,
-        "PULocationID" AS pickup_location_id,
-        "DOLocationID" AS dropoff_location_id,
+        "PULocationID" AS PULocationID,
+        "DOLocationID" AS DOLocationID,
         payment_type,
         fare_amount,
         extra,
@@ -35,13 +35,13 @@ with green_taxi_trip_records_cleaned as(
 
 green_taxi_trip_records_additional_columns as(
 select
-    vendor_id,
+    vendorid,
     lpep_pickup_datetime,
     lpep_dropoff_datetime,
     store_and_fwd_flag,
-    ratecode_id,
-    pickup_location_id,
-    dropoff_location_id,
+    ratecodeid,
+    PULocationID,
+    DOLocationID,
     passenger_count,
     trip_distance,
     fare_amount,
@@ -60,8 +60,8 @@ select
     total_amount-raw_total as difference,
     case
         when
-        abs(total_amount-raw_total)>0.0001 then True
-        else False
+        abs(total_amount-raw_total)>0.0001 then 1
+        else 0
     end as inconsistent_total_amount,
     case 
         when
@@ -74,19 +74,19 @@ select
         or tip_amount < 0
         or tolls_amount < 0
         or congestion_surcharge < 0
-        then True
-        else False
+        then 1
+        else 0
     end as is_negative,
     case
         when
-            ratecode_id is null then 99
-            else ratecode_id
-        end as ratecode_id_corrected,
+            ratecodeid is null then 99
+            else ratecodeid
+        end as ratecodeid_corrected,
     case
         when
         lpep_pickup_datetime = lpep_dropoff_datetime
-    then True
-    else False
+    then 1
+    else 0
 end as equal_pu_do_time
 from green_taxi_trip_records_cleaned
 )

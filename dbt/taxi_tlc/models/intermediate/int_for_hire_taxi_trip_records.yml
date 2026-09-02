@@ -1,0 +1,18 @@
+models:
+  - name: int_for_hire_taxi_trip_records
+    columns:
+      - name: pickup_datetime
+        data_tests:
+          - not_null
+      - name: dropOff_datetime
+        data_tests:
+          - not_null
+      - name: trip_time_calc
+        data_tests:
+          - not_null
+      - name: PULocationID
+        data_tests:
+          - not_null
+      - name: DOLocationID
+        data_tests:
+          - not_null

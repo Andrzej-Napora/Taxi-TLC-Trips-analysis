@@ -27,12 +27,18 @@ cbd_congestion_fee,
 case 
     when driver_pay < 0
     or base_passenger_fare < 0 
-    then True
-    else False
+        then 1
+        else 0
 end as is_negative,
+case
+    when "PULocationID" = "DOLocationID"
+        then 1
+        else 0
+end as equal_pu_do_time,
 case 
     when request_datetime>=on_scene_datetime
-    then True
-    else False
+    then 1
+    else 0
 end as time_inconsistency
 from {{source('raw','high_volume_taxi_trip_records')}}
+where pickup_datetime<=dropoff_datetime
