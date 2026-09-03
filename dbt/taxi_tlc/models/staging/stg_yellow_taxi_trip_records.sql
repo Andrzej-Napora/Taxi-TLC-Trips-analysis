@@ -1,15 +1,15 @@
 
 with yellow_taxi_trip_records_cleaned as(
     select
-        VendorID AS Vendor_ID,
+        vendorid AS vendor_id,
         tpep_pickup_datetime,
         tpep_dropoff_datetime,
         passenger_count,
         trip_distance,
-        RatecodeID AS Ratecode_ID,
+        ratecodeid AS ratecode_id,
         store_and_fwd_flag,
-        PULocationID AS PU_Location_ID,
-        DOLocationID AS DO_Location_ID,
+        pulocationid AS PU_Location_ID,
+        dolocationid AS DO_Location_ID,
         payment_type,
         fare_amount,
         extra,
@@ -19,15 +19,16 @@ with yellow_taxi_trip_records_cleaned as(
         improvement_surcharge,
         total_amount,
         congestion_surcharge,
-        coalesce(nullif(airport_fee, '')::double precision, 0) as airport_fee,
+        airport_fee,
+        
         fare_amount
         +extra
         +tip_amount
         +tolls_amount
         +mta_tax
-        +coalesce(congestion_surcharge,0)
+        +congestion_surcharge
         +improvement_surcharge
-        +coalesce(nullif(airport_fee, '')::double precision, 0)
+        +airport_fee
         as raw_total
     from {{source('raw' , 'yellow_trip_records')}}
 ),
@@ -90,6 +91,7 @@ select
 from yellow_taxi_trip_records_cleaned
 )
 select * from yellow_taxi_trip_records_additional_columns
-where tpep_pickup_datetime <= tpep_dropoff_datetime
-and vendor_id in (1,2,6,7)
-and trip_distance>=0
+where (vendor_id is null or vendor_id in (1,2,6,7))
+and (payment_type is null or payment_type in (0,1,2,3,4,5,6))
+and (ratecode_id is null or ratecode_id in (1,2,3,4,5,6,99))
+and (store_and_fwd_flag is null or store_and_fwd_flag in ('Y','N'))

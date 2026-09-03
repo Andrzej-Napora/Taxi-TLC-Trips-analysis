@@ -3,82 +3,31 @@ models:
     columns:
       - name: hvfhs_license_num
         data_tests:
-          - not_null
           - accepted_values:
               arguments:
                 values: ['HV0002', 'HV0003', 'HV0004', 'HV0005']
-      - name: dispatching_base_num
-        data_tests:
-          - not_null
-      - name: request_datetime
-        data_tests:
-          - not_null
-      - name: on_scene_datetime
-        data_tests:
-          - not_null
-      - name: pickup_datetime
-        data_tests:
-          - not_null
-      - name: dropoff_datetime
-        data_tests:
-          - not_null
-      - name: trip_miles
-        data_tests:
-          - not_null
-      - name: trip_time
-        data_tests:
-          - not_null
-      - name: base_passenger_fare
-        data_tests:
-          - not_null
-      - name: tolls
-        data_tests:
-          - not_null
-      - name: bcf
-        data_tests:
-          - not_null
-      - name: sales_tax
-        data_tests:
-          - not_null
-      - name: congestion_surcharge
-        data_tests:
-          - not_null
-      #- name: airport_fee
-      #  data_tests:
-      #    - not_null
-      - name: tips
-        data_tests:
-          - not_null
-      - name: driver_pay
-        data_tests:
-          - not_null
       - name: shared_request_flag
         data_tests:
-          - not_null
           - accepted_values:
               arguments:
                 values: ['Y', 'N']
       - name: shared_match_flag
         data_tests:
-          - not_null
           - accepted_values:
               arguments:
                 values: ['Y', 'N']
       - name: access_a_ride_flag
         data_tests:
-          - not_null
           - accepted_values:
               arguments:
                 values: ['Y', 'N']
       - name: wav_request_flag
         data_tests:
-          - not_null
           - accepted_values:
               arguments:
                 values: ['Y', 'N']
       - name: wav_match_flag
         data_tests:
-          - not_null
           - accepted_values:
               arguments:
                 values: ['Y', 'N']

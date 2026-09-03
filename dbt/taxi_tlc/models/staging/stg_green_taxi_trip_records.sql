@@ -15,17 +15,16 @@ with green_taxi_trip_records_cleaned as(
         mta_tax,
         tip_amount,
         tolls_amount,
-        ehail_fee,
-        trip_type,
         improvement_surcharge,
         total_amount,
         congestion_surcharge,
+        
         fare_amount
         +extra
         +tip_amount
         +tolls_amount
         +mta_tax
-        +coalesce(congestion_surcharge,0)
+        +congestion_surcharge
         +improvement_surcharge
         as raw_total
     from {{source('raw' , 'green_trip_records')}}
@@ -87,7 +86,7 @@ end as equal_pu_do_time
 from green_taxi_trip_records_cleaned
 )
 select * from green_taxi_trip_records_additional_columns
-where lpep_pickup_datetime <= lpep_dropoff_datetime
-and PU_Location_ID is not null
-and DO_Location_ID is not null
-and  trip_distance>=0
+where (vendor_id is null or vendor_id in (1,2,6))
+and (payment_type is null or payment_type in (0,1,2,3,4,5,6))
+and (ratecode_id is null or ratecode_id in (1,2,3,4,5,6,99))
+and (store_and_fwd_flag is null or store_and_fwd_flag in ('Y','N'))

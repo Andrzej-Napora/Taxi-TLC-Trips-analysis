@@ -40,7 +40,8 @@ case
     else 0
 end as time_inconsistency
 from {{source('raw','fhvhv_trip_records')}}
-where pickup_datetime<=dropoff_datetime
-and access_a_ride_flag in ('Y','N')
-and on_scene_datetime is not null
-and dropoff_datetime is not null
+where (shared_request_flag in ('Y','N') or shared_request_flag is null)
+and (shared_match_flag in ('Y','N') or shared_match_flag is null)
+and (access_a_ride_flag in ('Y','N') or access_a_ride_flag is null)
+and (wav_request_flag in ('Y','N') or wav_request_flag is null)
+and (wav_match_flag in ('Y','N') or wav_match_flag is null)

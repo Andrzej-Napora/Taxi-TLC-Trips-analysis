@@ -1,5 +1,5 @@
 (
-select * from {{ref('int_yellow_taxi_trip_records')}} 
+select * from {{ref('int_yellow_taxi_trip_records')}}
 )
 union all
 (

@@ -1,6 +1,16 @@
 select
 pickup_datetime,
-dropOff_datetime,
+ -- time shift in new york
+case 
+    when
+        EXTRACT(MONTH FROM pickup_datetime) = 11
+        AND EXTRACT(DAY FROM pickup_datetime) BETWEEN 1 AND 7
+        AND EXTRACT(DOW FROM pickup_datetime) = 0
+        AND EXTRACT(HOUR FROM pickup_datetime) = 1
+        AND dropoff_datetime + INTERVAL '1 hour' > pickup_datetime
+    then dropOff_datetime + interval '1 hour'
+    else dropoff_datetime
+end as dropOff_datetime,
 PU_Location_ID,
 DO_Location_ID,
 EXTRACT(EPOCH FROM 
@@ -22,10 +32,10 @@ null::text as wav_request_flag,
 null::text as wav_match_flag,
 case
     when SR_Flag = 1 
-        and dispatching_base_num in ('B02510','B02844')
+        and dispatching_base_num in ('b02510','b02844')
         then 'likely_shared_ride'
     when SR_Flag = 1
-        and dispatching_base_num not in ('B02510','B02844')
+        and dispatching_base_num not in ('b02510','b02844')
         then 'requested/shared_ride'
     else 'not_shared_ride'
 end as shared_ride,
@@ -35,4 +45,4 @@ where (pickup_datetime is not null
     and dropOff_datetime is not null
     and PU_Location_ID is not null
     and DO_Location_ID is not null)
-    and dropOff_datetime>=pickup_datetime
+    and dropoff_datetime >= pickup_datetime

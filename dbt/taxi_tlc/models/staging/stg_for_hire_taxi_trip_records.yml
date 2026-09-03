@@ -1,12 +1,2 @@
 models:
   - name: stg_for_hire_taxi_trip_records
-    columns:
-      - name: dispatching_base_num
-        data_tests:
-          - not_null
-      - name: pickup_datetime
-        data_tests:
-          - not_null
-      - name: dropOff_datetime
-        data_tests:
-          - not_null

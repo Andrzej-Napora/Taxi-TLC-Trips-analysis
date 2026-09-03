@@ -1,6 +1,16 @@
 select
 pickup_datetime,
-dropoff_datetime,
+ -- time shift in new york
+case 
+    when
+        EXTRACT(MONTH FROM pickup_datetime) = 11
+        AND EXTRACT(DAY FROM pickup_datetime) BETWEEN 1 AND 7
+        AND EXTRACT(DOW FROM pickup_datetime) = 0
+        AND EXTRACT(HOUR FROM pickup_datetime) = 1
+        AND dropoff_datetime + INTERVAL '1 hour' > pickup_datetime
+    then dropOff_datetime + interval '1 hour'
+    else dropoff_datetime
+end as dropOff_datetime,
 PU_Location_ID,
 DO_Location_ID,
 EXTRACT(EPOCH FROM 
@@ -35,4 +45,5 @@ and dropoff_datetime is not null
 and PU_Location_ID is not null
 and DO_Location_ID is not null
 and trip_miles is not null)
-and dropoff_datetime>=pickup_datetime
+and ((trip_miles<0 and is_negative=1) or (trip_miles>=0 and is_negative=0))
+and dropoff_datetime >= pickup_datetime
