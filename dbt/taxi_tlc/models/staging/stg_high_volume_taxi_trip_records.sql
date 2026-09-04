@@ -15,6 +15,7 @@ tolls,
 bcf,
 sales_tax,
 congestion_surcharge,
+cbd_congestion_fee,
 airport_fee,
 tips,
 driver_pay,
@@ -40,8 +41,8 @@ case
     else 0
 end as time_inconsistency
 from {{source('raw','fhvhv_trip_records')}}
-where (shared_request_flag in ('Y','N') or shared_request_flag is null)
-and (shared_match_flag in ('Y','N') or shared_match_flag is null)
-and (access_a_ride_flag in ('Y','N') or access_a_ride_flag is null)
-and (wav_request_flag in ('Y','N') or wav_request_flag is null)
-and (wav_match_flag in ('Y','N') or wav_match_flag is null)
+where (shared_request_flag in ('y','n') or shared_request_flag is null)
+and (shared_match_flag in ('y','n') or shared_match_flag is null)
+and (access_a_ride_flag in ('y','n') or access_a_ride_flag is null)
+and (wav_request_flag in ('y','n') or wav_request_flag is null)
+and (wav_match_flag in ('y','n') or wav_match_flag is null)

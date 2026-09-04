@@ -20,4 +20,4 @@ models:
         data_tests:
           - accepted_values:
               arguments:
-                values: ['Y','N']
+                values: ['y','n']

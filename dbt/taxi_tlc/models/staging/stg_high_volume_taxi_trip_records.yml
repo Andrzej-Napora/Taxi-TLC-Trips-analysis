@@ -5,29 +5,29 @@ models:
         data_tests:
           - accepted_values:
               arguments:
-                values: ['HV0002', 'HV0003', 'HV0004', 'HV0005']
+                values: ['hv0002', 'hv0003', 'hv0004', 'hv0005']
       - name: shared_request_flag
         data_tests:
           - accepted_values:
               arguments:
-                values: ['Y', 'N']
+                values: ['y', 'n']
       - name: shared_match_flag
         data_tests:
           - accepted_values:
               arguments:
-                values: ['Y', 'N']
+                values: ['y', 'n']
       - name: access_a_ride_flag
         data_tests:
           - accepted_values:
               arguments:
-                values: ['Y', 'N']
+                values: ['y', 'n']
       - name: wav_request_flag
         data_tests:
           - accepted_values:
               arguments:
-                values: ['Y', 'N']
+                values: ['y', 'n']
       - name: wav_match_flag
         data_tests:
           - accepted_values:
               arguments:
-                values: ['Y', 'N']
+                values: ['y', 'n']

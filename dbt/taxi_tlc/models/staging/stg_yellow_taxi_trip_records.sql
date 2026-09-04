@@ -19,16 +19,17 @@ with yellow_taxi_trip_records_cleaned as(
         improvement_surcharge,
         total_amount,
         congestion_surcharge,
+        cbd_congestion_fee,
         airport_fee,
         
-        fare_amount
-        +extra
-        +tip_amount
-        +tolls_amount
-        +mta_tax
-        +congestion_surcharge
-        +improvement_surcharge
-        +airport_fee
+        coalesce(fare_amount,0)
+        +coalesce(extra,0)
+        +coalesce(tip_amount,0)
+        +coalesce(tolls_amount,0)
+        +coalesce(mta_tax,0)
+        +coalesce(congestion_surcharge,0)
+        +coalesce(improvement_surcharge,0)
+        +coalesce(airport_fee,0)
         as raw_total
     from {{source('raw' , 'yellow_trip_records')}}
 ),
@@ -52,6 +53,7 @@ select
     improvement_surcharge,
     payment_type,
     congestion_surcharge,
+    cbd_congestion_fee,
     total_amount,
     airport_fee,
     round(
@@ -94,4 +96,4 @@ select * from yellow_taxi_trip_records_additional_columns
 where (vendor_id is null or vendor_id in (1,2,6,7))
 and (payment_type is null or payment_type in (0,1,2,3,4,5,6))
 and (ratecode_id is null or ratecode_id in (1,2,3,4,5,6,99))
-and (store_and_fwd_flag is null or store_and_fwd_flag in ('Y','N'))
+and (store_and_fwd_flag is null or store_and_fwd_flag in ('y','n'))
