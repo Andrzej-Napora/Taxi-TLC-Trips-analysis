@@ -118,8 +118,8 @@ Run
 ```bash
 docker compose logs jupyter
 ```
-search terminal for lines similiar to:
-http://localhost:8888/lab?token=ba6a115624519cd432ef3f3b345bf3172f05100ebe27485c
+search terminal for lines similiar to:<br>
+http://localhost:8888/lab?token=ba6a115624519cd432ef3f3b345bf3172f05100ebe27485c<br>
 http://127.0.0.1:8888/lab?token=ba6a115624519cd432ef3f3b345bf3172f05100ebe27485c
 
 Copy the generated URL or enter the token at `http://localhost:8888`.
