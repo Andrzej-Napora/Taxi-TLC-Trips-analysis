@@ -6,6 +6,8 @@ The goal is to build an automated pipeline that downloads monthly trip data, loa
 
 # Pipeline
 
+## Local pipeline
+
 NYC TLC Parquet files<br>
 → automated Python ingestion<br>
 → batch processing with PyArrow<br>
@@ -18,6 +20,18 @@ NYC TLC Parquet files<br>
 
 Docker Compose controls the execution order and starts each service after its dependencies complete successfully.
 
+## Databricks pipeline
+
+NYC TLC Parquet files<br>
+→ Python ingestion into a Unity Catalog Volume<br>
+→ Bronze Delta tables<br>
+→ Silver validation and cleaning<br>
+→ Gold analytical models<br>
+→ data quality tests<br>
+→ travel time prediction<br>
+
+The Databricks pipeline is currently under development. It is intended to process the same source data using PySpark, Delta Lake and the medallion architecture.
+
 # Technology stack
 
 Docker Compose<br>
@@ -28,7 +42,10 @@ Pandas and PyArrow<br>
 SQLAlchemy and psycopg2<br>
 dbt Core<br>
 JupyterLab<br>
-Databricks in progress<br>
+Databricks<br>
+Apache Spark and PySpark<br>
+Unity Catalog and Volumes<br>
+Delta Lake in progress<br>
 
 # Dataset
 
@@ -43,11 +60,13 @@ Green Taxi<br>
 For-Hire Vehicles<br>
 High Volume For-Hire Vehicles<br>
 
-The Parquet files are not included in the repository, they are downloaded automatically with the 'docker compose up' command.
+The Parquet files are not included in the repository. They are downloaded automatically with the `docker compose up` command for the local pipeline.
+
+The Databricks implementation uses a separate Python ingestion script that downloads selected monthly files directly into a Unity Catalog Volume.
 
 # Data ingestion
 
-The Python ingestion service automatically:
+The local Python ingestion service automatically:
 
 1. generates download URLs for a selected date range<br>
 2. downloads only missing Parquet files<br>
@@ -63,16 +82,35 @@ Each taxi category is stored in a separate raw table. New monthly files are appe
 
 The dbt project uses three transformation layers:
 
-Staging<br>
+## Staging
+
 Standardizes column names and types, applies basic cleaning rules, and performs source-level data quality checks.
 
-Intermediate<br>
+## Intermediate
+
 Combines compatible trip sources and creates features required for travel time analysis.
 
-Marts<br>
-Provides single final table, consisting of all merged taxi category tables prepared for analytics, JupyterLab and machine learning.
+## Marts
 
-# Running the project
+Provides a single final table consisting of all merged taxi category tables prepared for analytics, JupyterLab and machine learning.
+
+# Databricks pipeline
+
+Development of a separate Databricks implementation has started.
+
+The current implementation includes:
+
+1. Unity Catalog schemas for the medallion architecture<br>
+2. a Unity Catalog Volume used as the raw data landing area<br>
+3. a Python ingestion script for downloading selected monthly files directly into the Volume<br>
+4. eight months of NYC TLC data from August 2024 through March 2025<br>
+5. initial data inspection and schema validation with PySpark<br>
+6. development of incremental ingestion into Bronze tables<br>
+7. cleaning, format standarizing, feature engineering with Silver tables<br>
+8. unifying silver tables for one Gold table, ready for analytics and machine learning
+
+
+# Running the local project
 
 Install and start Docker Desktop.
 
@@ -98,7 +136,7 @@ Docker Compose will automatically:
 4. build and test the dbt models<br>
 5. start JupyterLab after successful completion<br>
 
-The first run may take a significant amount of time because the source files contains tens of millions of records.
+The first run may take a significant amount of time because the source files contain tens of millions of records.
 
 # Connecting to PostgreSQL
 
@@ -112,17 +150,26 @@ Password: value of `POSTGRES_PASSWORD` from `.env`<br>
 
 # Accessing JupyterLab
 
-JupyterLab is available at: http://localhost:8888
+JupyterLab is available at:
 
-Run
+http://localhost:8888
+
+Run:
+
 ```bash
 docker compose logs jupyter
 ```
-search terminal for lines similiar to:<br>
-http://localhost:8888/lab?token=ba6a115624519cd432ef3f3b345bf3172f05100ebe27485c<br>
-http://127.0.0.1:8888/lab?token=ba6a115624519cd432ef3f3b345bf3172f05100ebe27485c
 
-Copy the generated URL or enter the token at `http://localhost:8888`.
+Search the terminal output for lines similar to:
+
+```text
+http://localhost:8888/lab?token=generated_token
+http://127.0.0.1:8888/lab?token=generated_token
+```
+
+Copy one of the generated URLs or enter the token at:
+
+http://localhost:8888
 
 # Stopping the project
 
@@ -132,7 +179,7 @@ To stop and remove the containers while preserving PostgreSQL data:
 docker compose down
 ```
 
-To remove the containers and PostgreSQL volume:
+To remove the containers and the PostgreSQL volume:
 
 ```bash
 docker compose down -v
@@ -142,7 +189,7 @@ The second command permanently removes the local database.
 
 # Current status
 
-Completed:
+## Completed local pipeline
 
 Automated monthly Parquet downloads<br>
 Memory-efficient batch processing<br>
@@ -154,17 +201,29 @@ Data quality tests<br>
 Travel time feature preparation<br>
 JupyterLab environment<br>
 
-In progress:
+## Databricks development completed so far
 
-Databricks integration<br>
-Apache Spark processing<br>
-Delta Lake architecture<br>
+Unity Catalog schemas created<br>
+Raw Unity Catalog Volume configured<br>
+Python download script adapted to Databricks Volumes<br>
+Eight months of source Parquet files downloaded<br>
+Initial PySpark data exploration<br>
+Initial Bronze ingestion development<br>
+Silver data cleaning and validation<br>
+Gold analytical models<br>
+
+## In progress
+
+Incremental Bronze ingestion<br>
+Delta Lake medallion architecture<br>
+Automated data quality checks in Databricks<br>
 Multi-year data processing<br>
 Travel time prediction model<br>
-Pipeline orchestration and monitoring<br>
+Databricks workflow orchestration and monitoring<br>
+GitHub integration and reproducible Databricks deployment<br>
 
 # Project purpose
 
 This project was created to develop practical data engineering skills through automated ingestion, large-scale data processing, database design, transformation modeling, data quality testing and reproducible containerized environments.
 
-The local PostgreSQL pipeline serves as a working proof of concept. The next stage focuses on scaling the same workflow with Databricks, Apache Spark and Delta Lake.
+The local PostgreSQL and dbt pipeline serves as a working proof of concept. A separate Databricks implementation is now under development to process the same source data using PySpark, Unity Catalog, Delta Lake and the Bronze, Silver and Gold medallion architecture.
