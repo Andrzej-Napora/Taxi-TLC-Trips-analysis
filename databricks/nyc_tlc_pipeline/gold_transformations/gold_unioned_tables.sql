@@ -1,5 +1,4 @@
-create or replace table workspace.gold.unioned_tables
-using delta as(
+create or refresh materialized view workspace.gold.unioned_tables as
 
     (
     select
@@ -108,5 +107,3 @@ using delta as(
       inconsistent_total_amount
     from workspace.silver.fhvhv_trip_records
     )
-    
-)

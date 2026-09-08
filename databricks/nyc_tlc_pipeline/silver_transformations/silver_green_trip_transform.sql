@@ -1,45 +1,72 @@
-create or replace table workspace.silver.yellow_trip_records
-using delta as
+create or refresh materialized view workspace.silver.green_trip_records
+(
+    constraint valid_neccesery_features
+        expect(
+                pickup_datetime is not null
+                and dropOff_datetime is not null
+                and trip_distance is not null
+                and pu_location_id is not null
+                and do_location_id is not null
+            )
+            on violation drop row,
+    constraint valid_trip_distance
+        expect((trip_distance<0 and is_negative=1) or (trip_distance>=0 and is_negative=0))
+        on violation drop row,
+
+    constraint valid_time
+        expect(dropoff_datetime >= pickup_datetime)
+        on violation drop row,
+
+    constraint valid_ratecode
+        expect(ratecode_id_corrected in (1,2,4,5,6,99)),
+
+    constraint valid_location_code
+        expect(pu_location_id between 1 and 265 and do_location_id between 1 and 265)
+        on violation drop row
+)
+as
 
 with time_change as(
 select *,
 
 --the date of time rollback in new york - first sunday of november 2AM
 next_day(
-make_date(year(tpep_pickup_datetime), 10, 31),
+make_date(year(lpep_pickup_datetime), 10, 31),
 'SUN'
 ) + INTERVAL 2 HOURS as winter_time_change,
 
 --the date of time change in new york - second sunday of march 2AM
 next_day(
-    make_date(year(tpep_pickup_datetime), 3, 7),
+    make_date(year(lpep_pickup_datetime), 3, 7),
     'SUN'
 ) + INTERVAL 2 HOURS as summer_time_change
-from workspace.bronze.yellow_trip_records
+
+from workspace.bronze.green_trip_records
 ),
 
 transform as(
 select
-tpep_pickup_datetime as pickup_datetime,
+cast(lpep_pickup_datetime as timestamp) as pickup_datetime,
  -- time shift in new york
+ cast(
 case 
-    when (tpep_pickup_datetime<=winter_time_change 
-    and winter_time_change<tpep_dropoff_datetime+ interval 1 hour)
-    then tpep_dropoff_datetime + interval 1 hour
+    when (lpep_pickup_datetime<=winter_time_change 
+    and winter_time_change<lpep_dropoff_datetime+ interval 1 hour)
+    then lpep_dropoff_datetime + interval 1 hour
 
-    when tpep_pickup_datetime < summer_time_change 
-    and tpep_dropoff_datetime >= summer_time_change + interval 1 hour
-    then tpep_dropoff_datetime - interval 1 hour
+    when lpep_pickup_datetime < summer_time_change 
+    and lpep_dropoff_datetime >= summer_time_change + interval 1 hour
+    then lpep_dropoff_datetime - interval 1 hour
 
-    else tpep_dropoff_datetime
-end as dropoff_datetime,
+    else lpep_dropoff_datetime
+end as timestamp) as dropoff_datetime,
 `PULocationID` as pu_location_id,
 `DOLocationID` as do_location_id,
 try_cast(`RatecodeID` as BIGINT) as ratecode_id,
 trip_distance,
 congestion_surcharge,
 cbd_congestion_fee,
-`Airport_fee` as airport_fee,
+cast(null as DEC) as airport_fee,
 CAST(NULL AS INT) as time_inconsistency,
 CAST(NULL AS INT) as trip_time,
 CAST(NULL AS STRING) as shared_request_flag,
@@ -56,7 +83,6 @@ coalesce(fare_amount,0)
 +coalesce(mta_tax,0)
 +coalesce(congestion_surcharge,0)
 +coalesce(improvement_surcharge,0)
-+coalesce(`Airport_fee`,0)
 as raw_total,
 
 case 
@@ -69,29 +95,27 @@ case
     or tip_amount < 0
     or tolls_amount < 0
     or congestion_surcharge < 0
-    or Airport_fee < 0 
     then 1
     else 0
 end as is_negative,
-
 case
     when
         `RatecodeID` is null then 99
         else `RatecodeID`
     end as ratecode_id_corrected,
-
 case
     when
-    tpep_pickup_datetime = tpep_dropoff_datetime
+    lpep_pickup_datetime = lpep_dropoff_datetime
     then 1
     else 0
 end as equal_pu_do_time,
-
-total_amount,
-'yellow' as data_type
+'green' as data_type,
+total_amount
 from time_change
-
 )
+
+
+
 select
 pickup_datetime,
 dropoff_datetime,
@@ -114,11 +138,8 @@ ratecode_id_corrected,
 equal_pu_do_time,
 data_type,
 CAST(
-    timestampdiff( 
-        SECOND, 
-            pickup_datetime,
-            dropoff_datetime
-    ) as INT) AS trip_time_calc,
+    timestampdiff( SECOND, pickup_datetime, dropoff_datetime) as INT
+) AS trip_time_calc,
 case
     when
     abs(total_amount-raw_total)>0.0001 then 1

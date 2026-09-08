@@ -1,5 +1,34 @@
-create or replace table workspace.silver.fhvhv_trip_records
-using delta as
+create or refresh materialized view workspace.silver.fhvhv_trip_records
+(
+    constraint valid_neccesery_features
+        expect(
+                pickup_datetime is not null
+                and dropoff_datetime is not null
+                and trip_distance is not null
+                and pu_location_id is not null
+                and do_location_id is not null
+            )
+            on violation drop row,
+    constraint valid_trip_distance
+        expect((trip_distance<0 and is_negative=1) or (trip_distance>=0 and is_negative=0))
+        on violation drop row,
+
+    constraint valid_time
+        expect(dropoff_datetime >= pickup_datetime)
+        on violation drop row,
+        
+    constraint valid_location_code
+        expect(pu_location_id between 1 and 265 and do_location_id between 1 and 265)
+        on violation drop row,
+
+    constraint valid_flags
+    expect(shared_request_flag in ('Y','N')
+        and shared_match_flag in ('Y','N')
+        and access_a_ride_flag in ('Y','N')
+        and wav_request_flag in ('Y','N')
+        and wav_match_flag in ('Y','N'))
+)
+as
 
 with time_change as(
 select *,
@@ -20,8 +49,9 @@ from workspace.bronze.fhvhv_trip_records
 ),
 
 transform as (select
-pickup_datetime,
+cast(pickup_datetime as timestamp),
  -- time shift in new york
+cast(
 case 
     when (pickup_datetime<=winter_time_change 
     and winter_time_change<dropoff_datetime+ interval 1 hour)
@@ -32,7 +62,7 @@ case
     then dropoff_datetime - interval 1 hour
 
     else dropoff_datetime
-end as dropoff_datetime,
+end as timestamp) as dropoff_datetime,
 `PULocationID` as pu_location_id,
 `DOLocationID` as do_location_id,
 cast(null as int) as ratecode_id,
@@ -74,16 +104,6 @@ wav_match_flag,
 cast(null as string) as shared_ride,
 'high_volume' as data_type
 from time_change
-where pickup_datetime is not null
-and dropoff_datetime is not null
-and PULocationID is not null
-and DOLocationID is not null
-and trip_miles is not null
-and (shared_request_flag in ('y','n','Y','N') or shared_request_flag is null)
-and (shared_match_flag in ('y','n','Y','N') or shared_match_flag is null)
-and (access_a_ride_flag in ('y','n','Y','N') or access_a_ride_flag is null)
-and (wav_request_flag in ('y','n','Y','N') or wav_request_flag is null)
-and (wav_match_flag in ('y','n','Y','N') or wav_match_flag is null)
 )
 
 select
@@ -113,5 +133,3 @@ cast(
 cast(null as int) as inconsistent_total_amount
 
 from transform
-where ((trip_distance<0 and is_negative=1) or (trip_distance>=0 and is_negative=0))
-and dropoff_datetime >= pickup_datetime

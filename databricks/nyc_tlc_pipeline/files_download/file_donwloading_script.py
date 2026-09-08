@@ -39,7 +39,7 @@ def generate_date_range(start_date_str, end_date_str):
     
     return dates
 
-def download_parquet_file(date_str, taxi_type, target_path):
+def download_parquet_file(date_str, taxi_type, target_path,files_set):
     """
     Download a single parquet file for the specified date and taxi type.
     
@@ -57,6 +57,9 @@ def download_parquet_file(date_str, taxi_type, target_path):
     
     print(f"Downloading {filename}...")
     
+    if filename in files_set:
+        print(f"File already exists: {filename}")
+        return True
     try:
         response = requests.get(url, stream=True, timeout=300)
         response.raise_for_status()
@@ -114,9 +117,14 @@ def main():
         successful = 0
         failed = 0
         
+        files_set = set()
+        files = dbutils.fs.ls("/Volumes/workspace/bronze/raw")
+        for file in files:
+            files_set.add(file.name)
+
         for i, date_str in enumerate(dates, 1):
             print(f"[{i}/{total_files}] ", end="")
-            if download_parquet_file(date_str, taxi, volume_path):
+            if download_parquet_file(date_str, taxi, volume_path,files_set):
                 successful += 1
             else:
                 failed += 1

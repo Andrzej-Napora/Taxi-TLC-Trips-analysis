@@ -1,5 +1,22 @@
-create or replace table workspace.silver.fhv_trip_records
-using delta as
+create or refresh materialized view workspace.silver.fhv_trip_records
+(
+    constraint valid_neccesery_features
+    expect( pickup_datetime is not null
+        and dropoff_datetime is not null
+        and pu_location_id is not null
+        and do_location_id is not null)
+        on violation drop row,
+
+    constraint valid_time
+    expect( dropoff_datetime >= pickup_datetime)
+    on violation drop row,
+
+    constraint pu_do_location_code
+    expect( pu_location_id between 1 and 265 and do_location_id between 1 and 265)
+    on violation drop row
+
+)
+as
 
 with time_change as(
 select *,
@@ -20,8 +37,9 @@ from workspace.bronze.fhv_trip_records
 ),
 
 transform as (select
-pickup_datetime,
+cast(pickup_datetime as timestamp),
  -- time shift in new york
+ cast(
 case 
     when (pickup_datetime<=winter_time_change 
     and winter_time_change<dropoff_datetime+ interval 1 hour)
@@ -32,7 +50,7 @@ case
     then dropoff_datetime - interval 1 hour
 
     else dropoff_datetime
-end as dropoff_datetime,
+end as timestamp) as dropoff_datetime,
 `PUlocationID` as pu_location_id,
 `DOlocationID` as do_location_id,
 cast(null as INT) as ratecode_id,
@@ -99,4 +117,3 @@ cast(
 ) AS trip_time_calc,
 cast(null as int) as inconsistent_total_amount
 from transform
-where dropoff_datetime >= pickup_datetime
