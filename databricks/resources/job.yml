@@ -5,6 +5,7 @@ resources:
 
       tasks:
         - task_key: download_files
+          environment_key: default
           spark_python_task:
             python_file: ../nyc_tlc_pipeline/files_download/file_downloading_script.py
 
@@ -13,3 +14,12 @@ resources:
             - task_key: download_files
           pipeline_task:
             pipeline_id: ${resources.pipelines.nyc_tlc_project.id}
+
+      environments:
+        - environment_key: default
+          
+          spec:
+            environment_version: '2'
+            dependencies:
+              - requests
+              - python-dateutil
