@@ -3,7 +3,7 @@ resources:
     nyc_tlc_project:
       name: nyc_tlc_project
 
-        libraries:
+    libraries:
         - glob:
             include: ../nyc_tlc_pipeline/files_download/**
         - glob:
