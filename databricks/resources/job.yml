@@ -1,0 +1,15 @@
+resources:
+  jobs:
+    nyc_tlc_job:
+      name: nyc_tlc_job
+
+      tasks:
+        - task_key: download_files
+          spark_python_task:
+            python_file: ../nyc_tlc_pipeline/files_download/file_downloading_script.py
+
+        - task_key: run_pipeline
+          depends_on:
+            - task_key: download_files
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.nyc_tlc_project.id}

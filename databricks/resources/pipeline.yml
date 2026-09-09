@@ -12,8 +12,6 @@ resources:
       serverless: true
       libraries:
       - glob:
-          include: ../nyc_tlc_pipeline/files_download/**
-      - glob:
           include: ../nyc_tlc_pipeline/bronze_transformations/**
       - glob:
           include: ../nyc_tlc_pipeline/silver_transformations/**
