@@ -2,20 +2,20 @@ resources:
   pipelines:
     nyc_tlc_project:
       name: nyc_tlc_project
+      target: silver
 
-    libraries:
-        - glob:
-            include: ../nyc_tlc_pipeline/files_download/**
-        - glob:
-            include: ../nyc_tlc_pipeline/bronze_transformations/**
-        - glob:
-            include: ../nyc_tlc_pipeline/silver_transformations/**
-        - glob:
-            include: ../nyc_tlc_pipeline/gold_transformations/**
-
-    continuous: false
-    development: true
-    photon: true
-    channel: CURRENT
-    catalog: workspace
-    serverless: true
+      continuous: false
+      development: true
+      photon: true
+      channel: CURRENT
+      catalog: workspace
+      serverless: true
+      libraries:
+      - glob:
+          include: ../nyc_tlc_pipeline/files_download/**
+      - glob:
+          include: ../nyc_tlc_pipeline/bronze_transformations/**
+      - glob:
+          include: ../nyc_tlc_pipeline/silver_transformations/**
+      - glob:
+          include: ../nyc_tlc_pipeline/gold_transformations/**
