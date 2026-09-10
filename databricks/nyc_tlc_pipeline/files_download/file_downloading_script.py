@@ -13,11 +13,12 @@ VOLUME = "raw"
 BASE_URL = "https://d37ci6vzurychx.cloudfront.net/trip-data"
 
 # Parameters - modify these to set your download range
-START_DATE = "2024-08"  # Format: YYYY-MM
-END_DATE = "2025-03"    # Format: YYYY-MM
+START_DATE = "2025-06"  # Format: YYYY-MM
+END_DATE = (datetime.now()-relativedelta(months=1)).strftime("%Y-%m")    # Format: YYYY-MM
 TAXI_TYPE = ["yellow","green","fhv","fhvhv"]    # Options: yellow, green, fhv, fhvhv
 
-def generate_date_range(start_date_str, end_date_str):
+
+def generate_date_range(start_date_str,end_date_str):
     """
     Generate a list of year-month strings between start and end dates.
     
@@ -52,42 +53,43 @@ def download_parquet_file(date_str, taxi_type, target_path,files_set):
         True if successful, False otherwise
     """
     filename = f"{taxi_type}_tripdata_{date_str}.parquet"
-    url = f"{BASE_URL}/{filename}"
-    target_file = f"{target_path}/{filename}"
-    
-    print(f"Downloading {filename}...")
-    
     if filename in files_set:
         print(f"File already exists: {filename}")
-        return True
-    try:
-        response = requests.get(url, stream=True, timeout=300)
-        response.raise_for_status()
-        
-        # Write to Unity Catalog Volume
-        with open(target_file, 'wb') as f:
-            for chunk in response.iter_content(chunk_size=8192):
-                if chunk:
-                    f.write(chunk)
-        
-        file_size_mb = response.headers.get('content-length')
-        if file_size_mb:
-            file_size_mb = int(file_size_mb) / (1024 * 1024)
-            print(f"✓ Successfully downloaded {filename} ({file_size_mb:.2f} MB)")
-        else:
-            print(f"✓ Successfully downloaded {filename}")
-        
-        return True
-        
-    except requests.exceptions.HTTPError as e:
-        if e.response.status_code == 404:
-            print(f"✗ File not found: {filename} (might not be available yet)")
-        else:
-            print(f"✗ HTTP error downloading {filename}: {e}")
         return False
-    except Exception as e:
-        print(f"✗ Error downloading {filename}: {e}")
-        return False
+    
+    else:
+        url = f"{BASE_URL}/{filename}"
+        target_file = f"{target_path}/{filename}"
+        print(f"Downloading {filename}...")
+    
+        try:
+            response = requests.get(url, stream=True, timeout=300)
+            response.raise_for_status()
+            
+            # Write to Unity Catalog Volume
+            with open(target_file, 'wb') as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    if chunk:
+                        f.write(chunk)
+            
+            file_size_mb = response.headers.get('content-length')
+            if file_size_mb:
+                file_size_mb = int(file_size_mb) / (1024 * 1024)
+                print(f"✓ Successfully downloaded {filename} ({file_size_mb:.2f} MB)")
+            else:
+                print(f"✓ Successfully downloaded {filename}")
+            
+            return True
+            
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 404:
+                print(f"✗ File not found: {filename} (might not be available yet)")
+            else:
+                print(f"✗ HTTP error downloading {filename}: {e}")
+            return False
+        except Exception as e:
+            print(f"✗ Error downloading {filename}: {e}")
+            return False
 
 def main():
     """
@@ -108,7 +110,7 @@ def main():
         print()
         
         # Generate date range
-        dates = generate_date_range(START_DATE, END_DATE)
+        dates = generate_date_range(START_DATE,END_DATE)
         total_files = len(dates)
         
         print(f"Will attempt to download {total_files} file(s)\n")

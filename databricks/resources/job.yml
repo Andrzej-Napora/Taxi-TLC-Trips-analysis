@@ -3,6 +3,11 @@ resources:
     nyc_tlc_job:
       name: nyc_tlc_job
 
+      schedule:
+        quartz_cron_expression: "0 0 15 15 * ?"
+        timezone_id: America/New_York
+        pause_status: UNPAUSED
+
       tasks:
         - task_key: download_files
           environment_key: default
@@ -20,6 +25,3 @@ resources:
           
           spec:
             environment_version: '2'
-            dependencies:
-              - requests
-              - python-dateutil
