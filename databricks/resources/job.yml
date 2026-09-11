@@ -20,6 +20,13 @@ resources:
           pipeline_task:
             pipeline_id: ${resources.pipelines.nyc_tlc_project.id}
 
+        - task_key: test_gold
+          environment_key: default
+          depends_on:
+            - task_key: run_pipeline
+          spark_python_task:
+            python_file: ../nyc_tlc_pipeline/tests/test_gold.py
+
       environments:
         - environment_key: default
           
