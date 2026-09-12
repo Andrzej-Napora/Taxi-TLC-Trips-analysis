@@ -1,8 +1,13 @@
-dfy = spark.table('workspace.silver.yellow_trip_records')
-dfg = spark.table('workspace.silver.green_trip_records')
-dffhv = spark.table('workspace.silver.fhv_trip_records')
-dfhv = spark.table('workspace.silver.fhvhv_trip_records')
-dfgold = spark.table('workspace.gold.unioned_tables')
+CATALOG_NAME=spark.conf.get("project.catalog_name")
+SILVER_SCHEMA = spark.conf.get("project.silver_schema")
+GOLD_SCHEMA = spark.conf.get("project.gold_schema")
+
+
+dfy = spark.table(f'{CATALOG_NAME}.{SILVER_SCHEMA}.yellow_trip_records')
+dfg = spark.table(f'{CATALOG_NAME}.{SILVER_SCHEMA}.green_trip_records')
+dffhv = spark.table(f'{CATALOG_NAME}.{SILVER_SCHEMA}.fhv_trip_records')
+dfhv = spark.table(f'{CATALOG_NAME}.{SILVER_SCHEMA}.fhvhv_trip_records')
+dfgold = spark.table(f'{CATALOG_NAME}.{GOLD_SCHEMA}.unioned_tables')
 
 error = False
 

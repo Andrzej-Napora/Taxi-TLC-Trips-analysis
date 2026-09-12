@@ -7,13 +7,14 @@ from dateutil.relativedelta import relativedelta
 import time
 
 # Configuration
-CATALOG = "workspace"
-SCHEMA = "bronze"
+CATALOG = spark.conf.get("project.catalog_name")
+BRONZE_SCHEMA = spark.conf.get("project.bronze_schema")
+RAW_PATH = spark.conf.get("project.raw_path")
 VOLUME = "raw"
 BASE_URL = "https://d37ci6vzurychx.cloudfront.net/trip-data"
 
 # Parameters - modify these to set your download range
-START_DATE = "2025-06"  # Format: YYYY-MM
+START_DATE = spark.conf.get("project.initial_date")  # Format: YYYY-MM
 END_DATE = (datetime.now()-relativedelta(months=1)).strftime("%Y-%m")    # Format: YYYY-MM
 TAXI_TYPE = ["yellow","green","fhv","fhvhv"]    # Options: yellow, green, fhv, fhvhv
 
@@ -96,7 +97,7 @@ def main():
     Main function to download NYC TLC trip data files.
     """
     # Construct volume path
-    volume_path = f"/Volumes/{CATALOG}/{SCHEMA}/{VOLUME}"
+    volume_path = f"/Volumes/{CATALOG}/{BRONZE_SCHEMA}/{VOLUME}"
     
     for taxi in TAXI_TYPE:
         print("="*60)
@@ -120,7 +121,7 @@ def main():
         failed = 0
         
         files_set = set()
-        files = dbutils.fs.ls("/Volumes/workspace/bronze/raw")
+        files = dbutils.fs.ls(RAW_PATH)
         for file in files:
             files_set.add(file.name)
 
@@ -131,7 +132,7 @@ def main():
             else:
                 failed += 1
             
-            # Be nice to the server - add a small delay between downloads
+            # add a small delay between downloads
             if i < total_files:
                 time.sleep(1)
             print()

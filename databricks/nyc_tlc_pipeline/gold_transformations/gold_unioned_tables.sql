@@ -1,4 +1,4 @@
-create or refresh materialized view workspace.gold.unioned_tables as
+create or refresh materialized view ${project.catalog_name}.${project.gold_schema}.unioned_tables as
 
     (
     select
@@ -24,7 +24,7 @@ create or refresh materialized view workspace.gold.unioned_tables as
       data_type,
       trip_time_calc,
       inconsistent_total_amount
-    from workspace.silver.yellow_trip_records
+    from ${project.catalog_name}.${project.silver_schema}.yellow_trip_records
     )
     union all
     (
@@ -51,7 +51,7 @@ create or refresh materialized view workspace.gold.unioned_tables as
       data_type,
       trip_time_calc,
       inconsistent_total_amount
-    from workspace.silver.green_trip_records
+    from ${project.catalog_name}.${project.silver_schema}.green_trip_records
     )
     union all
     (
@@ -78,7 +78,7 @@ create or refresh materialized view workspace.gold.unioned_tables as
       data_type,
       trip_time_calc,
       inconsistent_total_amount
-    from workspace.silver.fhv_trip_records
+    from ${project.catalog_name}.${project.silver_schema}.fhv_trip_records
     )
     union all
     (
@@ -105,5 +105,5 @@ create or refresh materialized view workspace.gold.unioned_tables as
       data_type,
       trip_time_calc,
       inconsistent_total_amount
-    from workspace.silver.fhvhv_trip_records
+    from ${project.catalog_name}.${project.silver_schema}.fhvhv_trip_records
     )

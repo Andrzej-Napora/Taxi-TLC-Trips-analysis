@@ -1,9 +1,73 @@
 bundle:
   name: nyc_tlc_project
 
+variables:
+  catalog_name:
+    description: catalog used by the project
+    default: workspace
+  
+  schema_name:
+    description: pipeline default schema
+    default: silver
+
+  raw_volume_path:
+    description: path to Volumes
+    default: /Volumes/workspace/bronze/raw
+
+  time_zone:
+    description: time zone used for taxi timestamp
+    default: America/New_York
+
+  initial_date:
+    description: initial date of analizing dataset
+    default: 2025-06
+
+  bronze_schema:
+    description: default pipeline schema
+    default: "bronze_dev"
+  silver_schema: 
+    description: default pipeline schema
+    default: "silver_dev"
+  gold_schema: 
+    description: default pipeline schema
+    default: "gold_dev"
+
 include:
   - ./resources/*.yml
 
 targets:
   dev:
     default: true
+    mode: development
+
+    variables:
+      bronze_schema: "bronze_dev"
+      silver_schema: "silver_dev"
+      gold_schema: "gold_dev"
+
+    resources:
+      jobs:
+        nyc_tlc_job:
+          name: nyc_tlc_job
+          schedule:
+            pause_status: PAUSED
+
+
+  prod:
+    default: false
+    mode: production
+    workspace:
+      root_path:
+        /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}
+
+    variables:
+      bronze_schema: "bronze"
+      silver_schema: "silver"
+      gold_schema: "gold"
+
+    resources:
+      jobs:
+        nyc_tlc_job:
+          name: nyc_tlc_job
+          schedule:
+            pause_status: UNPAUSED

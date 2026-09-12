@@ -1,4 +1,6 @@
-create or refresh materialized view workspace.silver.fhv_trip_records
+
+
+create or refresh materialized view ${project.catalog_name}.${project.silver_schema}.fhv_trip_records
 (
     constraint valid_neccesery_features
     expect( pickup_datetime is not null
@@ -33,7 +35,7 @@ next_day(
     'SUN'
 ) + INTERVAL 2 HOURS as summer_time_change
 
-from workspace.bronze.fhv_trip_records
+from ${project.catalog_name}.${project.bronze_schema}.fhv_trip_records
 ),
 
 transform as (select
