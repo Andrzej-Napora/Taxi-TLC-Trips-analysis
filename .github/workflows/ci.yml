@@ -26,4 +26,4 @@ jobs:
                 ./databricks/resources
                 .github/workflows\ci.yml
             - name: check python syntax
-              run: python -m compileall -q nyc_tlc_project
+              run: python -m compileall -q ./databricks/nyc_tlc_pipeline

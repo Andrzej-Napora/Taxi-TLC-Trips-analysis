@@ -3,6 +3,10 @@
 .env.*
 !.env.example
 
+#temporal files
+__pycache__/
+*.pyc
+
 
 # Keep directory structure, ignore its content
 /data/*
