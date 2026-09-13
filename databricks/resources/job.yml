@@ -1,12 +1,13 @@
+---
 resources:
   jobs:
     nyc_tlc_job:
-      name: nyc_tlc_job
+      name: nyc_tlc_job_${bundle.target}
 
       schedule:
-        quartz_cron_expression: "0 0 15 15 * ?"
-        timezone_id: ${var.time_zone}
-        pause_status: UNPAUSED
+        quartz_cron_expression: ${var.schedule_time}
+        timezone_id: ${var.user_time_zone}
+        pause_status: PAUSED
 
       tasks:
         - task_key: download_files

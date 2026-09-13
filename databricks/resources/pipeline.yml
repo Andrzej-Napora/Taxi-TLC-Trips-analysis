@@ -1,3 +1,4 @@
+---
 resources:
   pipelines:
     nyc_tlc_project:
@@ -19,9 +20,11 @@ resources:
 
       configuration:
         spark.sql.session.timeZone: ${var.time_zone}
+        project.user_time_zone: ${var.user_time_zone}
+        project.schedule_time: ${var.schedule_time}
         project.raw_volume_path: ${var.raw_volume_path}
         project.catalog_name: ${var.catalog_name}
-        project.intial_date: ${var.initial_date}
+        project.initial_date: ${var.initial_date}
         project.bronze_schema: ${var.bronze_schema}
         project.silver_schema: ${var.silver_schema}
         project.gold_schema: ${var.gold_schema}

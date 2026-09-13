@@ -1,3 +1,4 @@
+---
 bundle:
   name: nyc_tlc_project
 
@@ -17,6 +18,14 @@ variables:
   time_zone:
     description: time zone used for taxi timestamp
     default: America/New_York
+
+  user_time_zone:
+    description: time zone used for schedule
+    default: Europe/Warsaw
+
+  schedule_time:
+    description: qartz crone expression for schedule time
+    default: "0 0 10 15 * ?"
 
   initial_date:
     description: initial date of analizing dataset
@@ -58,7 +67,7 @@ targets:
     mode: production
     workspace:
       root_path:
-        /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}
+        /Workspace/shared/.bundle/${bundle.name}/${bundle.target}
 
     variables:
       bronze_schema: "bronze"
@@ -71,3 +80,4 @@ targets:
           name: nyc_tlc_job
           schedule:
             pause_status: UNPAUSED
+            

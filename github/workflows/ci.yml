@@ -1,0 +1,28 @@
+---
+name: CI
+
+on:
+    pull_request:
+        branches: 
+            - main
+
+jobs:
+    code-quality:
+        name: Check YAML and python
+        runs-on: ubuntu-latest
+        steps:
+            - name: accesing repository workflow via checkout@v7
+            uses: actions/checkout@v7
+            - name: Set up Python
+            uses: actions/setup-python@v7
+            with:
+                python-version: "3.12"
+            - name: install CI dependencies
+            run: python -m pip install yamllint
+            - name: check YAML files
+            run: python -m yamllint databricks.yml resources .github/workflows
+            - name: check python syntax
+            run: python -m compileall -q nyc_tlc_project
+
+
+    
