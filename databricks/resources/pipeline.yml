@@ -11,11 +11,11 @@ resources:
       catalog: ${var.catalog_name}
       serverless: true
       libraries:
-      - glob:
+        - glob:
           include: ../nyc_tlc_pipeline/bronze_transformations/**
-      - glob:
+        - glob:
           include: ../nyc_tlc_pipeline/silver_transformations/**
-      - glob:
+        - glob:
           include: ../nyc_tlc_pipeline/gold_transformations/**
 
       configuration:

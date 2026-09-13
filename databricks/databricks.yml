@@ -6,7 +6,7 @@ variables:
   catalog_name:
     description: catalog used by the project
     default: workspace
-  
+
   schema_name:
     description: pipeline default schema
     default: silver
@@ -34,10 +34,10 @@ variables:
   bronze_schema:
     description: default pipeline schema
     default: "bronze_dev"
-  silver_schema: 
+  silver_schema:
     description: default pipeline schema
     default: "silver_dev"
-  gold_schema: 
+  gold_schema:
     description: default pipeline schema
     default: "gold_dev"
 
@@ -80,4 +80,3 @@ targets:
           name: nyc_tlc_job
           schedule:
             pause_status: UNPAUSED
-            
