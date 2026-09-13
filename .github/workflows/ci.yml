@@ -19,11 +19,11 @@ jobs:
                   python-version: "3.12"
             - name: install CI dependencies
               run: python -m pip install yamllint
-            - name: check YAML files
+            - name: check YAML files with yamllint
               run: >
                 python -m yamllint
                 ./databricks/databricks.yml
                 ./databricks/resources
                 .github/workflows\ci.yml
-            - name: check python syntax
+            - name: check python syntax with compileall
               run: python -m compileall -q ./databricks/nyc_tlc_pipeline
