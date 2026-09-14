@@ -1,10 +1,13 @@
 # NYC TLC Trip Record Data Download Script
 # Downloads Parquet files from NYC TLC trip data and saves to Unity Catalog Volume
 
-import requests
-from datetime import datetime, timedelta
-from dateutil.relativedelta import relativedelta
 import time
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
+import requests
+from date_utils import generate_date_range
+from dateutil.relativedelta import relativedelta
 
 # Configuration
 CATALOG = spark.conf.get("project.catalog_name")
@@ -12,34 +15,13 @@ BRONZE_SCHEMA = spark.conf.get("project.bronze_schema")
 RAW_PATH = spark.conf.get("project.raw_path")
 VOLUME = "raw"
 BASE_URL = "https://d37ci6vzurychx.cloudfront.net/trip-data"
+TIME_ZONE = ZoneInfo(spark.conf.get("project.user_time_zone"))
 
 # Parameters - modify these to set your download range
 START_DATE = spark.conf.get("project.initial_date")  # Format: YYYY-MM
-END_DATE = (datetime.now()-relativedelta(months=1)).strftime("%Y-%m")    # Format: YYYY-MM
-TAXI_TYPE = ["yellow","green","fhv","fhvhv"]    # Options: yellow, green, fhv, fhvhv
+END_DATE = (datetime.now(tz=TIME_ZONE)-relativedelta(months=1)).strftime("%Y-%m")    # Format: YYYY-MM
+TAXI_TYPE = ["yellow","green","fhv","fhvhv"]
 
-
-def generate_date_range(start_date_str,end_date_str):
-    """
-    Generate a list of year-month strings between start and end dates.
-    
-    Args:
-        start_date_str: Start date in YYYY-MM format
-        end_date_str: End date in YYYY-MM format
-    
-    Returns:
-        List of date strings in YYYY-MM format
-    """
-    start = datetime.strptime(start_date_str, "%Y-%m")
-    end = datetime.strptime(end_date_str, "%Y-%m")
-    
-    dates = []
-    current = start
-    while current <= end:
-        dates.append(current.strftime("%Y-%m"))
-        current += relativedelta(months=1)
-    
-    return dates
 
 def download_parquet_file(date_str, taxi_type, target_path,files_set):
     """
@@ -88,7 +70,7 @@ def download_parquet_file(date_str, taxi_type, target_path,files_set):
             else:
                 print(f"✗ HTTP error downloading {filename}: {e}")
             return False
-        except Exception as e:
+        except requests.exceptions.ConnectionError as e:
             print(f"✗ Error downloading {filename}: {e}")
             return False
 
@@ -103,7 +85,7 @@ def main():
         print("="*60)
         print("NYC TLC Trip Record Data Downloader")
         print("="*60)
-        print(f"Source: NYC TLC Trip Record Data")
+        print("Source: NYC TLC Trip Record Data")
         print(f"Date range: {START_DATE} to {END_DATE}")
         print(f"Taxi type: {taxi}")
         print(f"Target volume: {volume_path}")
