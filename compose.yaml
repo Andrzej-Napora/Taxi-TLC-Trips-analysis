@@ -25,7 +25,7 @@ services:
   ingestion:
     build:
       context: .
-      dockerfile: dockerfile.ingestion
+      dockerfile: docker/dockerfile.ingestion
     container_name: ingestion
     env_file:
       - .env
@@ -43,7 +43,7 @@ services:
     container_name: taxi_dbt
     build:
       context: .
-      dockerfile: dockerfile.dbt
+      dockerfile: docker/dockerfile.dbt
     env_file:
       - .env
     networks:
@@ -58,7 +58,7 @@ services:
     container_name: jupyter
     build:
       context: .
-      dockerfile: dockerfile.jupyter
+      dockerfile: docker/dockerfile.jupyter
     env_file:
       - .env
     ports:
