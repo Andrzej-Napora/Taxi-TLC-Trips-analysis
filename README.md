@@ -2,314 +2,381 @@
 
 A data engineering project based on trip records published by the New York City Taxi and Limousine Commission.
 
-The project contains two versions of the same data pipeline:
+The repository contains two implementations of the same pipeline:
 
-1. A local version built with Docker, PostgreSQL and dbt.
-2. A Databricks version built with PySpark, Spark SQL, Delta Lake and Lakeflow Pipelines.
+1. A local pipeline built with Docker, PostgreSQL and dbt.
+2. A Databricks pipeline built with PySpark, Spark SQL, Delta Lake and Lakeflow Pipelines.
 
-Both versions process monthly NYC TLC files and prepare the data for travel time analysis and prediction.
+Both implementations process monthly NYC TLC Parquet files and create a unified dataset for analysis and future travel time prediction.
 
-# Pipeline
+## Pipeline overview
 
-## Local pipeline
+### Local pipeline
 
-NYC TLC Parquet files<br>
-→ automated Python ingestion<br>
-→ batch processing with PyArrow<br>
-→ PostgreSQL raw tables<br>
-→ dbt staging models<br>
-→ dbt intermediate models<br>
-→ dbt marts<br>
-→ JupyterLab<br>
-→ travel time prediction<br>
+```text
+NYC TLC Parquet files
+        ↓
+Python ingestion with PyArrow
+        ↓
+PostgreSQL raw tables
+        ↓
+dbt staging and intermediate models
+        ↓
+dbt marts
+        ↓
+JupyterLab
+```
 
-Docker Compose starts the services in the correct order. Each service starts after its dependencies are ready.
+Docker Compose starts PostgreSQL, loads missing source files, builds the dbt models and starts JupyterLab.
 
-## Databricks pipeline
+### Databricks pipeline
 
-NYC TLC Parquet files<br>
-→ Python download script<br>
-→ source files stored in a Databricks Volume<br>
-→ Bronze streaming tables<br>
-→ Silver materialized views<br>
-→ data quality checks<br>
-→ combined Gold dataset<br>
-→ travel time prediction<br>
+```text
+NYC TLC Parquet files
+        ↓
+Python download task
+        ↓
+Databricks Volume
+        ↓
+Bronze streaming tables
+        ↓
+Silver materialized views
+        ↓
+Gold unified dataset
+        ↓
+Integration tests
+```
 
-The Databricks pipeline uses the Bronze, Silver and Gold structure.
+The Databricks implementation follows the Bronze, Silver and Gold architecture.
 
-Bronze<br>
-Loads the original Parquet files into Delta tables. Auto Loader keeps track of processed files and loads only new files during later runs.
+- Bronze loads source files into Delta streaming tables with Auto Loader.
+- Silver cleans and standardizes each taxi dataset and applies data quality checks.
+- Gold combines all taxi types into one dataset prepared for analysis and machine learning.
 
-Silver<br>
-Cleans each taxi dataset, standardizes columns and data types, calculates additional values and checks data quality.
+## Technology stack
 
-Gold<br>
-Combines Yellow Taxi, Green Taxi, FHV and High Volume FHV records into one dataset prepared for analysis and machine learning.
+### Local pipeline
 
-# Technology stack
+- Docker Compose
+- PostgreSQL and SQL
+- Python
+- Requests
+- Pandas and PyArrow
+- SQLAlchemy and psycopg2
+- dbt Core
+- JupyterLab
 
-## Local version
+### Databricks pipeline
 
-Docker Compose<br>
-PostgreSQL and SQL<br>
-Python<br>
-Requests<br>
-Pandas and PyArrow<br>
-SQLAlchemy and psycopg2<br>
-dbt Core<br>
-JupyterLab<br>
+- Databricks
+- Apache Spark and PySpark
+- Spark SQL
+- Delta Lake
+- Lakeflow Pipelines
+- Lakeflow Jobs
+- Databricks Volumes
+- Declarative Automation Bundles
+- Python, SQL and YAML
 
-## Databricks version
+### Testing and CI
 
-Databricks<br>
-Apache Spark and PySpark<br>
-Spark SQL<br>
-Delta Lake<br>
-Lakeflow Pipelines<br>
-Lakeflow Jobs<br>
-Databricks Volumes<br>
-Declarative Automation Bundles<br>
-Python<br>
-SQL<br>
-YAML<br>
+- pytest
+- requests-mock
+- Ruff
+- yamllint
+- Python compileall
+- GitHub Actions
 
-# Dataset
+## Dataset
 
 The project uses the official NYC TLC Trip Record Data:
 
 https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page
 
-The following taxi types are included:
+Included taxi types:
 
-Yellow Taxi<br>
-Green Taxi<br>
-For-Hire Vehicles<br>
-High Volume For-Hire Vehicles<br>
+- Yellow Taxi
+- Green Taxi
+- For-Hire Vehicles
+- High Volume For-Hire Vehicles
 
-The source Parquet files are not stored in this repository.
+Source Parquet files are not stored in this repository. Both pipeline versions download missing files automatically.
 
-The local pipeline downloads them automatically after running:
+## Local pipeline
 
-```bash
-docker compose up
-```
+The local ingestion service:
 
-The Databricks version uses a separate Python script that downloads the selected monthly files into a Databricks Volume.
+1. Generates URLs for the selected monthly range.
+2. Downloads only missing files.
+3. Processes large Parquet files in smaller PyArrow batches.
+4. Loads data into PostgreSQL with `COPY FROM STDIN`.
+5. Tracks completed files to prevent duplicate loading.
 
-# Local data ingestion
+Each taxi type is stored in a separate PostgreSQL table.
 
-The local Python ingestion service:
+The dbt project contains:
 
-1. generates download URLs for the selected date range<br>
-2. downloads only missing Parquet files<br>
-3. reads large files in smaller batches with PyArrow<br>
-4. keeps column types consistent<br>
-5. adds newly detected columns to existing PostgreSQL tables<br>
-6. loads batches using PostgreSQL `COPY FROM STDIN`<br>
-7. records successfully processed files to prevent duplicate loading<br>
+- staging models for cleaning and standardization,
+- intermediate models for compatible schemas and calculated values,
+- marts combining all taxi types into one final dataset.
 
-Each taxi type is stored in a separate PostgreSQL table. New monthly files are added to the correct table.
+## Databricks architecture
 
-# Local dbt architecture
+### Source files
 
-The dbt project uses three groups of models.
-
-## Staging
-
-The staging models standardize column names and types, perform basic cleaning and run source-level data quality tests.
-
-## Intermediate
-
-The intermediate models prepare compatible taxi datasets for combining and create values required for travel time analysis.
-
-## Marts
-
-The marts provide one final table containing records from all four taxi types.
-
-The final table is prepared for analysis in JupyterLab and for the planned travel time prediction model.
-
-# Databricks architecture
-
-## Source files
-
-The downloaded Parquet files are stored under:
+Source files are stored in a Unity Catalog Volume. The default development location is:
 
 ```text
 /Volumes/workspace/bronze/raw
 ```
 
-This location stores the original files before they are loaded into Delta tables.
+The location can be changed through Bundle variables.
 
-## Bronze
+### Bronze
 
-The Bronze layer uses streaming tables and Auto Loader to process Parquet files.
+Auto Loader processes source Parquet files and tracks previously loaded data.
 
-Each taxi type is stored separately:
+Each taxi type is stored in a separate streaming table.
 
-```text
-workspace.bronze.yellow_trip_records
-workspace.bronze.green_trip_records
-workspace.bronze.fhv_trip_records
-workspace.bronze.fhvhv_trip_records
-```
+### Silver
 
-Auto Loader keeps track of processed files. This allows later pipeline runs to load only newly added files.
+Separate Spark SQL transformations:
 
-## Silver
+- standardize column names and data types,
+- remove records without required values,
+- handle New York daylight saving time,
+- calculate trip duration,
+- identify invalid values,
+- apply Lakeflow Expectations,
+- prepare compatible schemas for the Gold layer.
 
-Each taxi type has a separate Spark SQL transformation.
+### Gold
 
-The Silver transformations include:
-
-1. standardizing column names and data types<br>
-2. removing records without required values<br>
-3. correcting pickup and drop-off time calculations<br>
-4. handling daylight saving time changes in New York<br>
-5. calculating trip duration<br>
-6. detecting negative values<br>
-7. checking differences between reported and calculated totals<br>
-8. adding missing columns required by the final dataset<br>
-9. checking data quality with Lakeflow Expectations<br>
-
-Silver datasets are created as materialized views in the `workspace.silver` schema.
-
-Data quality rules report invalid records without stopping the pipeline or removing all incomplete data.
-
-## Gold
-
-The Gold layer combines all four Silver datasets into one dataset:
+The Gold layer combines all four taxi datasets into:
 
 ```text
 workspace.gold.unioned_tables
 ```
 
-Before combining the datasets, selected columns are converted to common data types.
+The result is prepared for data analysis, visualization and travel time prediction.
 
-The final Gold dataset can be used for:
+## Databricks workflow
 
-Data analysis<br>
-Data visualizations<br>
-Travel time prediction<br>
-Machine learning experiments<br>
-
-# Databricks workflow
-
-The Databricks workflow contains two tasks:
+The Lakeflow Job contains three dependent tasks:
 
 ```text
 download_files
       ↓
 run_pipeline
+      ↓
+test_gold
 ```
 
-The first task runs the Python download script.
+`download_files` calculates the required monthly range and downloads only missing source files.
 
-The second task starts the Lakeflow Pipeline only after the download task finishes successfully.
+`run_pipeline` starts the Lakeflow Pipeline after the download task succeeds.
 
-The Lakeflow Pipeline then creates or updates the Bronze, Silver and Gold datasets in the correct order based on their dependencies.
+`test_gold` runs integration checks against the completed Gold dataset, including:
 
-# Databricks Bundle configuration
+- record count consistency,
+- expected taxi type values,
+- schema consistency,
+- pickup and drop-off time consistency,
+- required value completeness,
+- valid NYC TLC location identifiers.
 
-The Databricks pipeline and Job are described by YAML files stored in this repository.
+These checks require Spark and existing tables, so they run inside Databricks.
 
-The main Bundle configuration file is:
+## Unit tests
+
+Local tests are stored in:
+
+```text
+databricks/nyc_tlc_pipeline/tests/
+```
+
+The tests cover Python functions that do not require a running Spark session, including:
+
+- monthly date range generation,
+- successful HTTP responses,
+- existing file detection,
+- HTTP and connection errors,
+- generated file names and URLs,
+- binary file output.
+
+HTTP calls are replaced with `requests-mock`, so tests do not connect to the NYC TLC server.
+
+Test files are written to temporary pytest directories and removed after the tests finish.
+
+Run the tests:
+
+```bash
+python -m pytest ./databricks/nyc_tlc_pipeline/tests
+```
+
+## Databricks Bundle
+
+The main Bundle configuration is stored in:
 
 ```text
 databricks/databricks.yml
 ```
 
-The pipeline and Job resources are defined in:
+Resource definitions are stored in:
 
 ```text
-databricks/resources/pipeline.yml
 databricks/resources/job.yml
+databricks/resources/pipeline.yml
 ```
 
-The configuration includes:
+The Bundle defines:
 
-Pipeline source files<br>
-Job tasks and their execution order<br>
-Databricks catalog and default schema<br>
-Serverless compute settings<br>
-Photon configuration<br>
-Development mode<br>
-New York time zone configuration<br>
+- Lakeflow Pipeline sources,
+- Lakeflow Job tasks and dependencies,
+- catalogs and schemas,
+- serverless compute and Photon,
+- environment variables,
+- development and production targets,
+- time zones and the production schedule.
 
-The pipeline uses:
+### Deployment targets
+
+The `dev` target:
+
+- uses development mode,
+- uses schemas with the `_dev` suffix,
+- keeps the schedule paused,
+- uses a deployment path associated with the current user.
+
+The `prod` target:
+
+- uses production mode,
+- uses production schemas,
+- enables the schedule,
+- uses a stable shared deployment path.
+
+Resource names contain the selected target:
+
+```text
+nyc_tlc_job_dev
+nyc_tlc_job_prod
+nyc_tlc_project_dev
+nyc_tlc_project_prod
+```
+
+### Time zones
+
+Taxi timestamps are processed with:
 
 ```yaml
 spark.sql.session.timeZone: America/New_York
 ```
 
-This setting ensures that timestamp values are interpreted using the New York time zone.
+The production schedule uses:
 
-# Databricks project structure
+```text
+Europe/Warsaw
+```
+
+The source data time zone and job schedule time zone are configured separately.
+
+## Databricks project structure
 
 ```text
 databricks/
 ├── databricks.yml
 ├── resources/
-│   ├── pipeline.yml
-│   └── job.yml
+│   ├── job.yml
+│   └── pipeline.yml
 └── nyc_tlc_pipeline/
     ├── files_download/
     ├── bronze_transformations/
     ├── silver_transformations/
-    └── gold_transformations/
+    ├── gold_transformations/
+    └── tests/
 ```
 
-# Deploying the Databricks pipeline
+## Continuous integration
 
-The Databricks version requires:
+GitHub Actions runs CI for every pull request targeting `main`.
 
-Databricks workspace access<br>
-Databricks CLI<br>
-An existing catalog and schemas<br>
-A Volume for the source Parquet files<br>
-Permissions to create and update pipeline datasets<br>
+The workflow is defined in:
 
-Open a terminal in the `databricks` directory:
+```text
+.github/workflows/ci.yml
+```
+
+CI contains two independent jobs.
+
+The code quality job runs:
+
+- yamllint for YAML files,
+- compileall for Python syntax,
+- Ruff for Python code quality.
+
+The test job prepares a clean Python environment and runs pytest.
+
+The `main` branch is protected. Changes must be submitted through a pull request, and all required CI checks must pass before merging.
+
+## Continuous delivery
+
+Production deployment is performed manually after successful CI and merge into `main`.
+
+Databricks Free Edition does not provide the account-level service principal configuration required for unattended deployment through GitHub Actions.
+
+The complete process is:
+
+```text
+Feature branch
+      ↓
+Pull request
+      ↓
+GitHub Actions CI
+      ↓
+Merge into main
+      ↓
+Manual Bundle validation
+      ↓
+Manual Bundle deployment
+      ↓
+Automatic execution through the Databricks schedule
+```
+
+This keeps code validation automated without storing long-lived Databricks credentials in GitHub.
+
+## Deploying to Databricks
+
+Open a terminal in the Bundle directory:
 
 ```bash
 cd databricks
 ```
 
-Validate the Bundle configuration:
+Validate the development target:
 
 ```bash
 databricks bundle validate -t dev
 ```
 
-Deploy the pipeline and Job:
+Deploy and run the development target:
 
 ```bash
 databricks bundle deploy -t dev
-```
-
-Run the complete workflow:
-
-```bash
 databricks bundle run nyc_tlc_job -t dev
 ```
 
-These commands perform three separate operations:
+Validate and deploy production:
 
-```text
-validate → checks the configuration
-deploy   → creates or updates the Databricks resources
-run      → starts the complete workflow
+```bash
+databricks bundle validate -t prod
+databricks bundle deploy -t prod
 ```
 
-The workflow can also be started from the Databricks `Jobs & Pipelines` page after it has been deployed.
+The production deployment does not run the Job immediately. Databricks starts it according to the schedule defined in the Bundle.
 
-The Bundle configuration allows the pipeline, Job and their settings to be stored in GitHub and deployed to another Databricks workspace.
+The workspace catalog, schemas, Volume, permissions and user credentials must be configured separately. They are not stored in this repository.
 
-The source data, existing tables, permissions and user credentials are not stored in the repository. They must be prepared separately in the target workspace.
-
-# Running the local pipeline
-
-Install and start Docker Desktop.
+## Running the local pipeline
 
 Create a `.env` file based on `.env.example`:
 
@@ -319,35 +386,13 @@ POSTGRES_PASSWORD=your_password
 POSTGRES_DB=your_database
 ```
 
-Do not commit the `.env` file to GitHub.
+Do not commit `.env`.
 
-Start the pipeline from the project directory:
+Start the pipeline:
 
 ```bash
 docker compose up
 ```
-
-Docker Compose will:
-
-1. start PostgreSQL<br>
-2. wait until the database is ready<br>
-3. download and load missing NYC TLC files<br>
-4. build and test the dbt models<br>
-5. start JupyterLab after the previous steps finish successfully<br>
-
-The first run can take a long time because the source files contain tens of millions of records.
-
-# Connecting to PostgreSQL
-
-Use the following settings in VS Code, DBeaver, pgAdmin or another database client:
-
-Host: `localhost`<br>
-Port: `5432`<br>
-Database: value of `POSTGRES_DB` from `.env`<br>
-Username: value of `POSTGRES_USER` from `.env`<br>
-Password: value of `POSTGRES_PASSWORD` from `.env`<br>
-
-# Accessing JupyterLab
 
 JupyterLab is available at:
 
@@ -355,83 +400,62 @@ JupyterLab is available at:
 http://localhost:8888
 ```
 
-To find the access token, run:
+Find the generated access token with:
 
 ```bash
 docker compose logs jupyter
 ```
 
-Look for a URL similar to:
-
-```text
-http://127.0.0.1:8888/lab?token=generated_token
-```
-
-Copy the complete URL and open it in a browser.
-
-# Stopping the local pipeline
-
-To stop and remove the Docker containers while keeping the PostgreSQL data:
+Stop the containers while keeping PostgreSQL data:
 
 ```bash
 docker compose down
 ```
 
-To remove the containers and the PostgreSQL data:
+Remove the containers and PostgreSQL data:
 
 ```bash
 docker compose down -v
 ```
 
-The second command permanently removes the local database.
+The second command permanently removes the local database volume.
 
-# Current status
+## Current status
 
-## Completed local pipeline
+Completed:
 
-Automated monthly Parquet downloads<br>
-Memory-efficient batch processing<br>
-PostgreSQL loading with `COPY FROM STDIN`<br>
-Protection against loading the same file more than once<br>
-Docker Compose pipeline<br>
-dbt staging, intermediate and marts models<br>
-dbt data quality tests<br>
-Travel time feature preparation<br>
-JupyterLab environment<br>
+- automated monthly data ingestion,
+- PostgreSQL loading with `COPY FROM STDIN`,
+- Docker Compose orchestration,
+- dbt staging, intermediate and marts models,
+- Bronze streaming tables with Auto Loader,
+- Silver Spark SQL transformations,
+- Lakeflow Expectations,
+- unified Gold dataset,
+- Declarative Automation Bundle,
+- separate `dev` and `prod` targets,
+- production schedule,
+- Lakeflow Job orchestration,
+- Gold integration checks,
+- local unit tests with mocked HTTP requests,
+- automated GitHub Actions CI,
+- protected `main` branch,
+- manual production deployment.
 
-## Completed Databricks pipeline
+Planned:
 
-Databricks schemas created<br>
-Volume for source Parquet files configured<br>
-Python download script adapted to Databricks<br>
-Eight months of source Parquet files downloaded<br>
-Initial data exploration with PySpark<br>
-Bronze streaming tables created with Auto Loader<br>
-Separate Silver transformations created for each taxi type<br>
-Lakeflow data quality rules added<br>
-Gold dataset combining all taxi types created<br>
-New York time zone added to the pipeline configuration<br>
-Declarative Automation Bundle created and validated<br>
-Lakeflow Job created for workflow orchestration<br>
-Download task connected to the Lakeflow Pipeline<br>
-Pipeline and Job successfully deployed from YAML configuration<br>
-Complete Databricks workflow successfully executed<br>
+- expanded test coverage,
+- improved pipeline monitoring,
+- larger date range processing,
+- travel time prediction model,
+- setup instructions for another Databricks workspace.
 
-## In progress
-
-Reviewing data quality results<br>
-Adding PySpark tests for the Gold dataset<br>
-Processing a larger date range<br>
-Improving pipeline monitoring<br>
-Travel time prediction model<br>
-Additional setup instructions for a new Databricks workspace<br>
-
-# Project purpose
+## Project purpose
 
 This project was created to develop practical data engineering skills.
 
-The local version focuses on Docker, PostgreSQL, Python and dbt. It shows how the complete pipeline can run on one computer.
+The local implementation demonstrates a complete pipeline built with Docker, PostgreSQL, Python and dbt.
 
-The Databricks version uses the same source data and similar transformation rules, but processes the data with Apache Spark, Delta Lake and Lakeflow Pipelines.
+The Databricks implementation processes the same data with Apache Spark, Delta Lake, Lakeflow Pipelines and Declarative Automation Bundles.
 
-Building both versions makes it possible to compare a local data pipeline with a cloud data platform and understand how the same process can be built with different tools.
+Maintaining both implementations makes it possible to compare a local data stack with a cloud data platform.
