@@ -7,6 +7,7 @@
 __pycache__/
 *.pyc
 .ruff*
+.pytest_cache
 
 
 # Keep directory structure, ignore its content
