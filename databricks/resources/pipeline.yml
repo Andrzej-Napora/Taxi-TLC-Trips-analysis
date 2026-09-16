@@ -11,9 +11,12 @@ resources:
       catalog: ${var.catalog_name}
       serverless: true
       libraries:
-        - glob: ../nyc_tlc_pipeline/bronze_transformations/**
-        - glob: ../nyc_tlc_pipeline/silver_transformations/**
-        - glob: ../nyc_tlc_pipeline/gold_transformations/**
+        - glob:
+          include: ../nyc_tlc_pipeline/bronze_transformations/**
+        - glob:
+          include: ../nyc_tlc_pipeline/silver_transformations/**
+        - glob:
+          include: ../nyc_tlc_pipeline/gold_transformations/**
 
       configuration:
         spark.sql.session.timeZone: ${var.time_zone}
